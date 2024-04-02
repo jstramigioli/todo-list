@@ -1,8 +1,22 @@
+//import date-fns assets
+
 import { isAfter } from "date-fns/isAfter"
+import { isSameDay } from "date-fns/isSameDay"
+import {
+    endOfToday
+} from "date-fns/endOfToday"
 
-// An array with all the projects of the app
+import {
+startOfToday
+} from "date-fns/startOfToday"
 
-const allProjectsArray = []
+import {
+endOfMonth
+} from "date-fns/endOfMonth"
+
+
+
+
 
 
 // Properties for task function factory
@@ -137,7 +151,9 @@ const createDateGrouping = (title, from, to) => {
     function addCorrespondingTasks() {
         for (let i = 0 ; i < allProjectsArray.length ; i++) {
             for (let k = 0 ; k < allProjectsArray[i].getTasks().length ; k++) {
-                if (isAfter(allProjectsArray[i].getTasks()[k].getDueDate(), from) 
+                if ((isAfter(allProjectsArray[i].getTasks()[k].getDueDate(), from)
+                    || 
+                    isSameDay(allProjectsArray[i].getTasks()[k].getDueDate(),from))
                     &&
                     isAfter(to, allProjectsArray[i].getTasks()[k].getDueDate() ))
                     {
@@ -182,10 +198,17 @@ const deleteProject = (project) => {
     allProjectsArray.splice(allProjectsArray.indexOf(project), 1)
 }
 
+// Initialize app
+const allProjectsArray = []
+const todayGroup = createDateGrouping('Today', startOfToday(), endOfToday())
+const thisMonthGroup = createDateGrouping('This month', startOfToday(), endOfMonth(new Date()))
 
 export { 
-        addNewProject,
+        
         allProjectsArray, 
+        todayGroup,
+        thisMonthGroup,
+        addNewProject,
         deleteTask,
         deleteProject,
         createDateGrouping,
