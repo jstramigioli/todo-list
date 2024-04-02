@@ -10,7 +10,7 @@ const allProjectsArray = []
 const hasTitle = (title) => {
     
     function sort(project) {
-        project.getTasks().sort((a,b) => a.title.content > b.description.content ? 1 : -1)
+        project.getTasks().sort((a,b) => a.title.content > b.title.content ? 1 : -1)
     }
 
     function edit(newTitle) {
@@ -87,11 +87,13 @@ const hasDueDate = (dueDate) => {
 
 const createTask = (title, description, priority, dueDate) => {
 
+    function getDueDate() {return this.dueDate.date}
     return {
         title: hasTitle(title),
         description: hasDescription(description),
         priority: hasPriority(priority),
-        dueDate: hasDueDate(dueDate)
+        dueDate: hasDueDate(dueDate),
+        getDueDate
     }
 }
 
@@ -118,6 +120,43 @@ const createProject = (title, description, tasks) => {
         sortTasks
     }
 }
+
+
+// Date Grouping factory
+
+const createDateGrouping = (title, from, to) => {
+
+    let tasks = []
+
+    function getTasks()  {return tasks}
+
+    function sortTasks(propertyToSort) {
+        this.tasks.sort(this.getTasks()[0][propertyToSort].sort(this))
+    }
+
+    function addCorrespondingTasks() {
+        for (let i = 0 ; i < allProjectsArray.length ; i++) {
+            for (let k = 0 ; k < allProjectsArray[i].getTasks().length ; k++) {
+                if (isAfter(allProjectsArray[i].getTasks()[k].getDueDate(), from) 
+                    &&
+                    isAfter(to, allProjectsArray[i].getTasks()[k].getDueDate() ))
+                    {
+                        tasks.push(allProjectsArray[i].getTasks()[k])
+                    }
+            }
+        }
+    }
+
+
+    return {
+        title,
+        tasks,
+        getTasks,
+        sortTasks,
+        addCorrespondingTasks
+    }
+}
+
 
 //Add new project
 
@@ -149,5 +188,5 @@ export {
         allProjectsArray, 
         deleteTask,
         deleteProject,
-        
-     }
+        createDateGrouping,
+    }
