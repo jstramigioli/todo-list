@@ -2,21 +2,10 @@
 
 import { isAfter } from "date-fns/isAfter"
 import { isSameDay } from "date-fns/isSameDay"
-import {
-    endOfToday
-} from "date-fns/endOfToday"
-
-import {
-startOfToday
-} from "date-fns/startOfToday"
-
-import {
-endOfMonth
-} from "date-fns/endOfMonth"
-
-
-
-
+import { endOfToday } from "date-fns/endOfToday"
+import { startOfToday } from "date-fns/startOfToday"
+import { endOfMonth } from "date-fns/endOfMonth"
+import { format } from "date-fns/format"
 
 
 // Properties for task function factory
@@ -92,8 +81,19 @@ const hasDueDate = (dueDate) => {
 
     return {
         date: dueDate,
+        display: format(dueDate, 'd MMMM, y'),
         sort,
         edit
+    }
+}
+
+const hasCompletionState = () => {
+    function completeTask() {this.completionState = 'complete'}
+    function incompleteTask() {this.completionState = 'incomplete'}
+    return {
+        completionState: 'incomplete' ,
+        completeTask,
+        incompleteTask
     }
 }
 
@@ -101,13 +101,23 @@ const hasDueDate = (dueDate) => {
 
 const createTask = (title, description, priority, dueDate) => {
 
+    function getTitle() {return this.title.content}
+    function getDescription() {return this.description.content}
+    function getPriorityDisplay() {return this.priority.display}
     function getDueDate() {return this.dueDate.date}
+    function getDueDateDisplay() {return this.dueDate.display}
+
     return {
         title: hasTitle(title),
         description: hasDescription(description),
         priority: hasPriority(priority),
         dueDate: hasDueDate(dueDate),
-        getDueDate
+        getTitle,
+        getDescription,
+        getPriorityDisplay,
+        getDueDate,
+        getDueDateDisplay,
+        ...hasCompletionState()
     }
 }
 
@@ -115,7 +125,9 @@ const createTask = (title, description, priority, dueDate) => {
 
 const createProject = (title, description, tasks) => {
     
-    function getTasks()  {return tasks}
+    function getTasks()  {return this.tasks}
+
+    function getTitle() {return this.title}
 
     function sortTasks(propertyToSort) {
         this.tasks.sort(this.tasks[0][propertyToSort].sort(this))
@@ -130,6 +142,7 @@ const createProject = (title, description, tasks) => {
         description,
         tasks,
         addNewTask,
+        getTitle,
         getTasks,
         sortTasks
     }
@@ -142,7 +155,9 @@ const createDateGrouping = (title, from, to) => {
 
     let tasks = []
 
-    function getTasks()  {return tasks}
+    function getTasks()  {return this.tasks}
+
+    function getTitle() {return this.title}
 
     function sortTasks(propertyToSort) {
         this.tasks.sort(this.getTasks()[0][propertyToSort].sort(this))
@@ -168,6 +183,7 @@ const createDateGrouping = (title, from, to) => {
         title,
         tasks,
         getTasks,
+        getTitle,
         sortTasks,
         addCorrespondingTasks
     }
@@ -202,13 +218,16 @@ const deleteProject = (project) => {
 const allProjectsArray = []
 const todayGroup = createDateGrouping('Today', startOfToday(), endOfToday())
 const thisMonthGroup = createDateGrouping('This month', startOfToday(), endOfMonth(new Date()))
+const dateGroup = [todayGroup, thisMonthGroup]
+const customGroup = []
+
 
 export { 
         
         allProjectsArray, 
-        todayGroup,
-        thisMonthGroup,
+        dateGroup,
         addNewProject,
+        createTask,
         deleteTask,
         deleteProject,
         createDateGrouping,
