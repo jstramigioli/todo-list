@@ -22,8 +22,9 @@ function initializeApp() {
     createDomStructure()
     updateDateGroups()
     updateDateGroupDOM(dateGroup)
-    updateCustomProjectsDOM(allProjectsArray)
+    updateCustomProjectsDOM(allProjectsArray, addNewProject)
 }
+
 
 
 

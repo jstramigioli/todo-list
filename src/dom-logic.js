@@ -1,5 +1,5 @@
 
-import { addNewProject, allProjectsArray, createTask } from './todo-logic'
+import { createTask } from './todo-logic'
 
 const refreshDOM = () => {
     
@@ -28,6 +28,49 @@ const createDomStructure = () => {
 
     const mainDisplay = document.createElement('main')
     mainDisplay.id = 'main-display'
+
+    // Create task container
+    const taskContainer = document.createElement('div')
+    taskContainer.id = 'task-container'
+
+    // Create Tasks Header
+    const taskHeader = document.createElement('header')
+    taskHeader.id = 'task-header'
+    taskHeader.classList = 'task-element'
+
+    const taskTitle = document.createElement('p')
+    taskTitle.classList = 'task-text'
+    taskTitle.textContent = 'TO DO'
+
+    const taskPriority = document.createElement('p')
+    taskPriority.classList = 'task-priority'
+    taskPriority.textContent = 'Priority'
+
+    const taskDueDate = document.createElement('p')
+    taskDueDate.classList = 'task-duedate'
+    taskDueDate.textContent = 'Due Date'
+
+    taskHeader.appendChild(taskTitle)
+    taskHeader.appendChild(taskPriority)
+    taskHeader.appendChild(taskDueDate)
+    taskContainer.appendChild(taskHeader)
+
+    // Create existing tasks container
+    const existingTasks = document.createElement('div')
+    existingTasks.id = 'existing-tasks'
+    taskContainer.appendChild(existingTasks)
+
+    // Create new task button
+    const newTaskButton = document.createElement('button')
+    newTaskButton.classList = 'new-task-button'
+    newTaskButton.textContent = '+ New Task'
+    newTaskButton.addEventListener('click', createNewTaskForm)
+    taskContainer.appendChild(newTaskButton)
+
+
+    mainDisplay.appendChild(taskContainer)
+
+
     content.appendChild(mainDisplay)
 
 }
@@ -36,6 +79,9 @@ function addProjectToDom(project, container) {
     const projectButton = document.createElement('button')
     projectButton.classList = 'project-button'
     projectButton.textContent = project.getTitle()
+    projectButton.addEventListener('click', () =>
+    loadTasks(project)
+    )
     container.appendChild(projectButton)
 }
 
@@ -79,62 +125,31 @@ function updateDateGroupDOM(dateGroup) {
     }
 }
 
-function updateCustomProjectsDOM(customProjects) {
+function updateCustomProjectsDOM(customProjects, addNewProjectFunction) {
     const groupContainer = document.querySelector('#custom-projects-container')
     groupContainer.innerHTML = ''
     for (let i = 0 ; i < customProjects.length ; i++) {
         addProjectToDom(customProjects[i], groupContainer)
     }
     const newProjectBtn = document.createElement('button')
-    newProjectBtn.classList = 'sidebar-btn'
-    newProjectBtn.textContent = '+'
+    newProjectBtn.classList = 'project-button'
+    newProjectBtn.textContent = '+ New Project'
     newProjectBtn.addEventListener('click', () => {
-        addNewProject(['Proyectito', 'probando el proyectito',[]])
-        updateCustomProjectsDOM(customProjects)
+        addNewProjectFunction(['Proyectito', 'probando el proyectito',[]])
+        updateCustomProjectsDOM(customProjects, addNewProjectFunction)
     })
     groupContainer.appendChild(newProjectBtn)
 }
 
 
 function loadTasks(project) {
-    // Create task container
-    const taskContainer = document.createElement('div')
-    taskContainer.id = 'task-container'
-
-    // Create Header
-    const taskHeader = document.createElement('header')
-    taskHeader.id = 'task-header'
-    taskHeader.classList = 'task-element'
-
-    const taskTitle = document.createElement('p')
-    taskTitle.classList = 'task-text'
-    taskTitle.textContent = 'TO DO'
-
-    const taskPriority = document.createElement('p')
-    taskPriority.classList = 'task-priority'
-    taskPriority.textContent = 'Priority'
-
-    const taskDueDate = document.createElement('p')
-    taskDueDate.classList = 'task-duedate'
-    taskDueDate.textContent = 'Due Date'
-
-    taskHeader.appendChild(taskTitle)
-    taskHeader.appendChild(taskPriority)
-    taskHeader.appendChild(taskDueDate)
-    taskContainer.appendChild(taskHeader)
-
-    // Add tasks to display
-    document.getElementById('main-display').appendChild(taskContainer)
+    
+    const taskContainer = document.querySelector('#existing-tasks')
+    taskContainer.innerHTML = ['']
+    
     for (let i = 0 ; i < project.getTasks().length ; i++) {
         addTaskToDom(project.tasks[i], taskContainer)
     }
-
-    // Add new task button
-    const newTaskButton = document.createElement('button')
-    newTaskButton.classList = 'new-task-button'
-    newTaskButton.textContent = '+'
-    newTaskButton.addEventListener('click', createNewTaskForm)
-    taskContainer.appendChild(newTaskButton)
     
 }
 
