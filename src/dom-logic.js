@@ -1,5 +1,5 @@
 
-import { createTask } from './todo-logic'
+import { addNewProject, allProjectsArray, createTask } from './todo-logic'
 
 const refreshDOM = () => {
     
@@ -15,8 +15,15 @@ const createDomStructure = () => {
     header.textContent = 'My To-do App'
     content.appendChild(header)
 
+    // SideBar
     const sideBar = document.createElement('div');
     sideBar.id = 'sidebar'
+    const dateGroupContainer = document.createElement('div')
+    dateGroupContainer.id = `date-group-container`
+    sideBar.appendChild(dateGroupContainer)
+    const customProjectsContainer = document.createElement('div')
+    customProjectsContainer.id = 'custom-projects-container'
+    sideBar.appendChild(customProjectsContainer)
     content.appendChild(sideBar)
 
     const mainDisplay = document.createElement('main')
@@ -65,14 +72,29 @@ function addTaskToDom(task, container) {
 
 }
 
-function loadGroup(group, groupName) {
-    const groupContainer = document.createElement('div')
-    groupContainer.classList = `${groupName}-container`
-    document.getElementById('sidebar').appendChild(groupContainer)
-    for (let i = 0 ; i < group.length ; i++) {
-        addProjectToDom(group[i], groupContainer)
+function updateDateGroupDOM(dateGroup) {
+    const groupContainer = document.querySelector('#date-group-container')
+    for (let i = 0 ; i < dateGroup.length ; i++) {
+        addProjectToDom(dateGroup[i], groupContainer)
     }
 }
+
+function updateCustomProjectsDOM(customProjects) {
+    const groupContainer = document.querySelector('#custom-projects-container')
+    groupContainer.innerHTML = ''
+    for (let i = 0 ; i < customProjects.length ; i++) {
+        addProjectToDom(customProjects[i], groupContainer)
+    }
+    const newProjectBtn = document.createElement('button')
+    newProjectBtn.classList = 'sidebar-btn'
+    newProjectBtn.textContent = '+'
+    newProjectBtn.addEventListener('click', () => {
+        addNewProject(['Proyectito', 'probando el proyectito',[]])
+        updateCustomProjectsDOM(customProjects)
+    })
+    groupContainer.appendChild(newProjectBtn)
+}
+
 
 function loadTasks(project) {
     // Create task container
@@ -134,6 +156,7 @@ function createNewTaskForm() {
 
 export {
     createDomStructure,
-    loadGroup , 
+    updateDateGroupDOM , 
+    updateCustomProjectsDOM ,
     loadTasks
 }

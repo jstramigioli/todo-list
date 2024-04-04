@@ -163,6 +163,10 @@ const createDateGrouping = (title, from, to) => {
         this.tasks.sort(this.getTasks()[0][propertyToSort].sort(this))
     }
 
+    function clearTasks() {
+        this.tasks = []
+    }
+
     function addCorrespondingTasks() {
         for (let i = 0 ; i < allProjectsArray.length ; i++) {
             for (let k = 0 ; k < allProjectsArray[i].getTasks().length ; k++) {
@@ -172,7 +176,7 @@ const createDateGrouping = (title, from, to) => {
                     &&
                     isAfter(to, allProjectsArray[i].getTasks()[k].getDueDate() ))
                     {
-                        tasks.push(allProjectsArray[i].getTasks()[k])
+                        this.tasks.push(allProjectsArray[i].getTasks()[k])
                     }
             }
         }
@@ -185,7 +189,8 @@ const createDateGrouping = (title, from, to) => {
         getTasks,
         getTitle,
         sortTasks,
-        addCorrespondingTasks
+        addCorrespondingTasks,
+        clearTasks
     }
 }
 
@@ -219,13 +224,20 @@ const allProjectsArray = []
 const todayGroup = createDateGrouping('Today', startOfToday(), endOfToday())
 const thisMonthGroup = createDateGrouping('This month', startOfToday(), endOfMonth(new Date()))
 const dateGroup = [todayGroup, thisMonthGroup]
-const customGroup = []
 
+
+function updateDateGroups() {
+    for (let i=0 ; i<dateGroup.length ; i++) {
+        dateGroup[i].clearTasks()
+        dateGroup[i].addCorrespondingTasks()
+    }
+}
 
 export { 
         
         allProjectsArray, 
         dateGroup,
+        updateDateGroups,
         addNewProject,
         createTask,
         deleteTask,
