@@ -2,11 +2,13 @@
 
 import { isAfter } from "date-fns/isAfter"
 import { isSameDay } from "date-fns/isSameDay"
-import { endOfToday } from "date-fns/endOfToday"
-import { startOfToday } from "date-fns/startOfToday"
-import { endOfMonth } from "date-fns/endOfMonth"
+
+
 import { format } from "date-fns/format"
 
+
+
+let projectID = 0
 
 // Properties for task function factory
 
@@ -44,6 +46,9 @@ const hasPriority = (priority) => {
     let display
 
     switch (priority) {
+        case 0:
+            display = 'No priority defined' ;
+            break;
         case 1: 
             display = 'Low';
             break;
@@ -97,6 +102,14 @@ const hasCompletionState = () => {
     }
 }
 
+const hasProjectID = () => {
+    let newID = projectID
+    projectID++
+    return {
+        ID: newID
+    }
+}
+
 // Task Function factory
 
 const createTask = (title, description, priority, dueDate) => {
@@ -137,14 +150,20 @@ const createProject = (title, description, tasks) => {
         this.getTasks().push(createTask(...taskProperties))
     }
 
+    function getID() {
+        return this.ID
+    }
+
     return {
         title,
         description,
         tasks,
+        ...hasProjectID(),
         addNewTask,
         getTitle,
         getTasks,
-        sortTasks
+        sortTasks,
+        getID
     }
 }
 
@@ -167,7 +186,7 @@ const createDateGrouping = (title, from, to) => {
         this.tasks = []
     }
 
-    function addCorrespondingTasks() {
+    function addCorrespondingTasks(allProjectsArray) {
         for (let i = 0 ; i < allProjectsArray.length ; i++) {
             for (let k = 0 ; k < allProjectsArray[i].getTasks().length ; k++) {
                 if ((isAfter(allProjectsArray[i].getTasks()[k].getDueDate(), from)
@@ -197,14 +216,14 @@ const createDateGrouping = (title, from, to) => {
 
 //Add new project
 
-const addNewProject = (projectProperties) => {
+const addNewProject = (projectProperties, allProjectsArray) => {
     allProjectsArray.push(createProject(...projectProperties))
 }
 
 
 // Delete Task
 
-const deleteTask = (task) => {
+const deleteTask = (task, allProjectsArray) => {
     for (let i = 0 ; i < allProjectsArray.length ; i++) {
         if (allProjectsArray[i].getTasks().includes(task)) {
             allProjectsArray[i].getTasks().splice(allProjectsArray[i].getTasks().indexOf(task), 1)
@@ -215,32 +234,30 @@ const deleteTask = (task) => {
 
 // Delete Project
 
-const deleteProject = (project) => {
+const deleteProject = (project, allProjectsArray) => {
     allProjectsArray.splice(allProjectsArray.indexOf(project), 1)
 }
 
-// Initialize app
-const allProjectsArray = []
-const todayGroup = createDateGrouping('Today', startOfToday(), endOfToday())
-const thisMonthGroup = createDateGrouping('This month', startOfToday(), endOfMonth(new Date()))
-const dateGroup = [todayGroup, thisMonthGroup]
 
 
-function updateDateGroups() {
+
+function updateDateGroups(dateGroup, allProjectsArray) {
     for (let i=0 ; i<dateGroup.length ; i++) {
         dateGroup[i].clearTasks()
-        dateGroup[i].addCorrespondingTasks()
+        dateGroup[i].addCorrespondingTasks(allProjectsArray)
     }
 }
 
+function setSelectedProject(project, selectedProjectVariable) {
+    selectedProjectVariable = project
+}
+
 export { 
-        
-        allProjectsArray, 
-        dateGroup,
         updateDateGroups,
         addNewProject,
         createTask,
         deleteTask,
         deleteProject,
         createDateGrouping,
+        setSelectedProject
     }
