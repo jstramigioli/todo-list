@@ -1,7 +1,6 @@
 import {  
         addNewProject, 
         updateDateGroups,
-        setSelectedProject,
         deleteTask , 
         deleteProject ,
         createDateGrouping ,
@@ -39,7 +38,7 @@ function initializeApp() {
 }
 
 function selectProject(project) {
-    setSelectedProject(project, selectedProject)
+    selectedProject = project
     updateDateGroups(dateGroup, allProjectsArray)
     console.log(selectedProject)
     loadTasks(project)

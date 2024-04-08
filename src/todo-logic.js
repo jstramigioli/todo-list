@@ -110,6 +110,14 @@ const hasProjectID = () => {
     }
 }
 
+// Array of projects function factory
+
+const createProjectsArray = () => {
+    return {
+        projects: []
+    }
+}
+
 // Task Function factory
 
 const createTask = (title, description, priority, dueDate) => {
@@ -248,9 +256,7 @@ function updateDateGroups(dateGroup, allProjectsArray) {
     }
 }
 
-function setSelectedProject(project, selectedProjectVariable) {
-    selectedProjectVariable = project
-}
+
 
 export { 
         updateDateGroups,
@@ -259,5 +265,4 @@ export {
         deleteTask,
         deleteProject,
         createDateGrouping,
-        setSelectedProject
     }

@@ -82,7 +82,6 @@ function addProjectToDom(project, container) {
     projectButton.textContent = project.getTitle()
     projectButton.addEventListener('click', () => {
         selectProject(project)
-        console.log(project)
     }
     )
     container.appendChild(projectButton)
@@ -167,6 +166,55 @@ function loadTasks(project) {
     
 }
 
+function createNewProjectForm() {
+    const overlay = document.createElement('div')
+    overlay.id = 'project-overlay'
+    overlay.addEventListener('click', (e) => {
+        document.body.removeChild(overlay)
+    })
+
+    const newProjectFormContainer = document.createElement('div')
+    newProjectFormContainer.id = 'new-project-form-container'
+    newProjectFormContainer.addEventListener('click', (e) => {
+        e.stopPropagation(); 
+    })
+    const form = document.createElement('form')
+    form.id = 'new-project-form'
+
+    // Add input and Label for Name
+    const newProjectName = document.createElement('div')
+    newProjectName.id = 'new-project-name'
+    newProjectName.classList = 'form-input'
+    const projectNameLabel = document.createElement('label')
+    projectNameLabel.htmlFor = 'project-name'
+    projectNameLabel.innerHTML = 'Project name'
+    newProjectName.appendChild(projectNameLabel)
+    const projectNameInput = document.createElement('input')
+    projectNameInput.type = 'text'
+    projectNameInput.name = 'project-name'
+    projectNameInput.id = 'project-name'
+    projectNameInput.placeholder = 'What is your new project about?'
+    projectNameInput.required = true
+    newProjectName.appendChild(projectNameInput)
+    form.appendChild(newProjectName)
+
+    // Add input and Label for Description
+    const newProjectDescription = document.createElement('div')
+    newProjectDescription.id = 'new-project-description'
+    newProjectDescription.classList = 'form-input'
+    const projectDescriptionLabel = document.createElement('label')
+    projectDescriptionLabel.htmlFor = 'project-description'
+    projectDescriptionLabel.innerHTML = 'Description'
+    newProjectDescription.appendChild(projectDescriptionLabel)
+    const projectDescriptionInput = document.createElement('textarea')
+    projectDescriptionInput.id = 'project-description'
+    projectDescriptionInput.name = 'project-description'
+    projectDescriptionInput.placeholder = 'If you want, write something about this project'
+    newProjectDescription.appendChild(projectDescriptionInput)
+    form.appendChild(newProjectDescription)
+
+}
+
 
 function createNewTaskForm() {
     const overlay = document.createElement('div')
@@ -199,10 +247,9 @@ function createNewTaskForm() {
         const project = document.createElement('option')
         project.label = allProjectsArray[i].getTitle()
         project.value = allProjectsArray[i].getID()
-        console.log(selectedProject)
-       /*  if (project.value == selectedProject.getID()) {
+        if (typeof selectedProject.getID === 'function' && project.value == selectedProject.getID()) {
             project.defaultSelected = true
-        } */
+        }
         hostProjectInput.appendChild(project)
     }
     hostProject.appendChild(hostProjectInput)
