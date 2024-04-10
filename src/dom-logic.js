@@ -116,8 +116,9 @@ function addTaskToDom(task, container) {
     deleteBtn.classList = 'task-delete'
     deleteBtn.textContent = 'X'
     deleteBtn.addEventListener('click', () => {
-        removeTask(task)
-        console.log(allProjectsArray)
+        task.deleteTask(allProjectsArray)
+        loadTasks(selectedProject)
+        console.log(selectedProject)
     })
 
 
@@ -138,7 +139,9 @@ function updateDateGroupDOM(dateGroup) {
     }
 }
 
-function updateCustomProjectsDOM(customProjects, addNewProjectFunction) {
+function updateCustomProjectsDOM(arr) {
+    const customProjects = arr.getProjects()
+    const addNewProjectFunction = arr.addNewProject
     const groupContainer = document.querySelector('#custom-projects-container')
     groupContainer.innerHTML = ''
     for (let i = 0 ; i < customProjects.length ; i++) {
@@ -148,8 +151,8 @@ function updateCustomProjectsDOM(customProjects, addNewProjectFunction) {
     newProjectBtn.classList = 'project-button'
     newProjectBtn.textContent = '+ New Project'
     newProjectBtn.addEventListener('click', () => {
-        addNewProjectFunction(['Proyectito', 'probando el proyectito',[]], customProjects)
-        updateCustomProjectsDOM(customProjects, addNewProjectFunction)
+        createNewProjectForm()
+        updateCustomProjectsDOM(arr)
     })
     groupContainer.appendChild(newProjectBtn)
 }
@@ -213,6 +216,30 @@ function createNewProjectForm() {
     newProjectDescription.appendChild(projectDescriptionInput)
     form.appendChild(newProjectDescription)
 
+    // Add submit button
+    const addProjectBtn = document.createElement('input')
+    addProjectBtn.type = 'submit'
+    addProjectBtn.textContent = '+'
+    form.appendChild(addProjectBtn)
+
+    newProjectFormContainer.appendChild(form)
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+
+        const allProjects = allProjectsArray
+        
+        const name = document.getElementById('project-name').value
+        const descr = document.getElementById('project-description').value
+
+        allProjects.addNewProject([name, descr])
+        updateCustomProjectsDOM(allProjectsArray)
+
+        document.body.removeChild(overlay)
+    })
+
+    overlay.appendChild(newProjectFormContainer)
+    document.body.appendChild(overlay)
 }
 
 
@@ -243,10 +270,10 @@ function createNewTaskForm() {
     const hostProjectInput = document.createElement('select')
     hostProjectInput.id = 'host-project'
     hostProjectInput.name = 'host-project'
-    for (let i=0 ; i < allProjectsArray.length ; i++) {
+    for (let i=0 ; i < allProjectsArray.getProjects().length ; i++) {
         const project = document.createElement('option')
-        project.label = allProjectsArray[i].getTitle()
-        project.value = allProjectsArray[i].getID()
+        project.label = allProjectsArray.getProjects()[i].getTitle()
+        project.value = allProjectsArray.getProjects()[i].getID()
         if (typeof selectedProject.getID === 'function' && project.value == selectedProject.getID()) {
             project.defaultSelected = true
         }
@@ -345,7 +372,7 @@ function createNewTaskForm() {
 
     form.addEventListener('submit', (e) => {
         e.preventDefault()
-        const allProjects = allProjectsArray
+        const allProjects = allProjectsArray.getProjects()
         const projectID = document.getElementById('host-project').value
         const project = allProjects.find((el) => {
             return el.getID() == projectID
@@ -360,7 +387,6 @@ function createNewTaskForm() {
         project.addNewTask([name, descr, prior, date])
         loadTasks(project)
         document.body.removeChild(overlay)
-        console.log(allProjectsArray)
     })
 
     overlay.appendChild(newTaskFormContainer)

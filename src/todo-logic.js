@@ -113,8 +113,20 @@ const hasProjectID = () => {
 // Array of projects function factory
 
 const createProjectsArray = () => {
+
+    function addNewProject(projectProperties) {
+        console.log(this.getProjects())
+        this.getProjects().push(createProject(...projectProperties))
+    }
+
+    function getProjects() {return this.projects} 
+ 
+
+
     return {
-        projects: []
+        projects: [] ,
+        addNewProject , 
+        getProjects
     }
 }
 
@@ -127,7 +139,14 @@ const createTask = (title, description, priority, dueDate) => {
     function getPriorityDisplay() {return this.priority.display}
     function getDueDate() {return this.dueDate.date}
     function getDueDateDisplay() {return this.dueDate.display}
-
+    
+    function deleteTask(allProjectsArray) {
+       for (let i = 0 ; i < allProjectsArray.getProjects().length ; i++) {
+            if (allProjectsArray.getProjects()[i].getTasks().includes(this)) {
+                allProjectsArray.getProjects()[i].getTasks().splice(allProjectsArray.getProjects()[i].getTasks().indexOf(this), 1)
+            }
+        }
+    }
     return {
         title: hasTitle(title),
         description: hasDescription(description),
@@ -138,13 +157,16 @@ const createTask = (title, description, priority, dueDate) => {
         getPriorityDisplay,
         getDueDate,
         getDueDateDisplay,
-        ...hasCompletionState()
+        ...hasCompletionState(),
+        deleteTask,
     }
 }
 
 // Project Function Factory
 
-const createProject = (title, description, tasks) => {
+const createProject = (title, description) => {
+    
+    const tasks = []
     
     function getTasks()  {return this.tasks}
 
@@ -162,6 +184,17 @@ const createProject = (title, description, tasks) => {
         return this.ID
     }
 
+    function deleteTask(task, allProjectsArray) {
+        this.getTasks().splice(this.getTasks().indexOf(task), 1)
+
+
+       /*  for (let i = 0 ; i < allProjectsArray.length ; i++) {
+            if (allProjectsArray[i].getTasks().includes(task)) {
+                allProjectsArray[i].getTasks().splice(allProjectsArray[i].getTasks().indexOf(task), 1)
+            }
+        } */
+    }
+
     return {
         title,
         description,
@@ -171,7 +204,8 @@ const createProject = (title, description, tasks) => {
         getTitle,
         getTasks,
         sortTasks,
-        getID
+        getID,
+        deleteTask
     }
 }
 
@@ -222,23 +256,6 @@ const createDateGrouping = (title, from, to) => {
 }
 
 
-//Add new project
-
-const addNewProject = (projectProperties, allProjectsArray) => {
-    allProjectsArray.push(createProject(...projectProperties))
-}
-
-
-// Delete Task
-
-const deleteTask = (task, allProjectsArray) => {
-    for (let i = 0 ; i < allProjectsArray.length ; i++) {
-        if (allProjectsArray[i].getTasks().includes(task)) {
-            allProjectsArray[i].getTasks().splice(allProjectsArray[i].getTasks().indexOf(task), 1)
-        }
-    }
-}
-
 
 // Delete Project
 
@@ -259,10 +276,9 @@ function updateDateGroups(dateGroup, allProjectsArray) {
 
 
 export { 
+        createProjectsArray ,
         updateDateGroups,
-        addNewProject,
         createTask,
-        deleteTask,
         deleteProject,
         createDateGrouping,
     }
