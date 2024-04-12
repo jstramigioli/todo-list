@@ -1,7 +1,7 @@
 import { selectProject ,
         allProjectsArray ,
-        removeTask,
-        selectedProject
+        selectedProject ,
+        storeData
         } from ".";
 
 
@@ -204,6 +204,7 @@ function updateCustomProjectsDOM(arr) {
         updateCustomProjectsDOM(arr)
     })
     groupContainer.appendChild(newProjectBtn)
+    storeData()
 }
 
 
@@ -221,7 +222,7 @@ function loadTasks(project) {
     for (let i = 0 ; i < project.getTasks().length ; i++) {
         addTaskToDom(project.getTasks()[i], taskContainer)
     }
-    
+    storeData()
 }
 
 function createNewProjectForm() {
