@@ -30,6 +30,18 @@ const createDomStructure = () => {
     const mainDisplay = document.createElement('main')
     mainDisplay.id = 'main-display'
 
+    // Create Project info
+    const projectInfoContainer = document.createElement('div')
+    projectInfoContainer.id = 'project-info-container'
+    const projectTitle = document.createElement('h1')
+    projectTitle.id = 'project-title'
+    projectInfoContainer.appendChild(projectTitle)
+    const projectDescription = document.createElement('h3')
+    projectDescription.id = 'project-description'
+    projectInfoContainer.appendChild(projectDescription)
+    mainDisplay.appendChild(projectInfoContainer)
+
+
     // Create task container
     const taskContainer = document.createElement('div')
     taskContainer.id = 'task-container'
@@ -39,17 +51,29 @@ const createDomStructure = () => {
     taskHeader.id = 'task-header'
     taskHeader.classList = 'task-element'
 
-    const taskTitle = document.createElement('p')
+    const taskTitle = document.createElement('button')
     taskTitle.classList = 'task-text'
     taskTitle.textContent = 'TO DO'
+    taskTitle.addEventListener('click', () => {
+        selectedProject.sortTasks('title')
+        loadTasks(selectedProject)
+    })
 
-    const taskPriority = document.createElement('p')
+    const taskPriority = document.createElement('button')
     taskPriority.classList = 'task-priority'
     taskPriority.textContent = 'Priority'
+    taskPriority.addEventListener('click', () => {
+        selectedProject.sortTasks('priority')
+        loadTasks(selectedProject)
+    })
 
-    const taskDueDate = document.createElement('p')
+    const taskDueDate = document.createElement('button')
     taskDueDate.classList = 'task-duedate'
     taskDueDate.textContent = 'Due Date'
+    taskDueDate.addEventListener('click', () => {
+        selectedProject.sortTasks('dueDate')
+        loadTasks(selectedProject)
+    })
 
     taskHeader.appendChild(taskTitle)
     taskHeader.appendChild(taskPriority)
@@ -77,14 +101,32 @@ const createDomStructure = () => {
 }
 
 function addProjectToDom(project, container) {
+    const projectDiv = document.createElement('div')
+
     const projectButton = document.createElement('button')
     projectButton.classList = 'project-button'
     projectButton.textContent = project.getTitle()
     projectButton.addEventListener('click', () => {
         selectProject(project)
+    })
+    projectDiv.appendChild(projectButton)
+
+    if (container.id == 'custom-projects-container') {
+        const deleteProjBtn = document.createElement('button')
+        deleteProjBtn.classList = 'delete-proj-btn'
+        deleteProjBtn.textContent = 'X'
+        deleteProjBtn.addEventListener('click', () => {
+            allProjectsArray.deleteProject(project)
+            allProjectsArray.updateDateGroups()
+            if (project == selectedProject) {
+                selectProject(allProjectsArray.dateGroups[0])
+            }   
+            container.removeChild(projectDiv)
+        })
+        projectDiv.appendChild(deleteProjBtn)
     }
-    )
-    container.appendChild(projectButton)
+
+    container.appendChild(projectDiv)
 }
 
 function addTaskToDom(task, container) {
@@ -112,20 +154,28 @@ function addTaskToDom(task, container) {
     taskDueDate.classList = 'task-duedate'
     taskDueDate.textContent = task.getDueDateDisplay()
 
+    const editBtn = document.createElement('button')
+    editBtn.classList = 'task-edit'
+    editBtn.textContent = 'Edit'
+    editBtn.addEventListener('click', () => {
+        createNewTaskForm('editing', task)
+        allProjectsArray.updateDateGroups()
+        loadTasks(selectedProject)
+    })
+
     const deleteBtn = document.createElement('button')
     deleteBtn.classList = 'task-delete'
     deleteBtn.textContent = 'X'
     deleteBtn.addEventListener('click', () => {
         task.deleteTask(allProjectsArray)
+        allProjectsArray.updateDateGroups()
         loadTasks(selectedProject)
-        console.log(selectedProject)
     })
-
-
 
     taskElement.appendChild(taskText)
     taskElement.appendChild(taskPriority)
     taskElement.appendChild(taskDueDate)
+    taskElement.appendChild(editBtn)
     taskElement.appendChild(deleteBtn)
     container.appendChild(taskElement)
 
@@ -141,7 +191,6 @@ function updateDateGroupDOM(dateGroup) {
 
 function updateCustomProjectsDOM(arr) {
     const customProjects = arr.getProjects()
-    const addNewProjectFunction = arr.addNewProject
     const groupContainer = document.querySelector('#custom-projects-container')
     groupContainer.innerHTML = ''
     for (let i = 0 ; i < customProjects.length ; i++) {
@@ -160,11 +209,17 @@ function updateCustomProjectsDOM(arr) {
 
 function loadTasks(project) {
     
+    const projectTitleDisplay = document.querySelector('#project-title')
+    projectTitleDisplay.textContent = project.title
+
+    const projectDescriptionDisplay = document.querySelector('#project-description')
+    projectDescriptionDisplay.textContent = project.description
+
     const taskContainer = document.querySelector('#existing-tasks')
     taskContainer.innerHTML = ['']
     
     for (let i = 0 ; i < project.getTasks().length ; i++) {
-        addTaskToDom(project.tasks[i], taskContainer)
+        addTaskToDom(project.getTasks()[i], taskContainer)
     }
     
 }
@@ -232,7 +287,7 @@ function createNewProjectForm() {
         const name = document.getElementById('project-name').value
         const descr = document.getElementById('project-description').value
 
-        allProjects.addNewProject([name, descr])
+        allProjects.createProject([name, descr])
         updateCustomProjectsDOM(allProjectsArray)
 
         document.body.removeChild(overlay)
@@ -243,13 +298,15 @@ function createNewProjectForm() {
 }
 
 
-function createNewTaskForm() {
+function createNewTaskForm(isEditing, task) {
     const overlay = document.createElement('div')
     overlay.id = 'overlay'
     overlay.addEventListener('click', (e) => {
         document.body.removeChild(overlay)
     })
 
+    let editing = false
+    if (isEditing == 'editing') editing = true
 
     const newTaskFormContainer = document.createElement('div')
     newTaskFormContainer.id = 'new-task-form-container'
@@ -294,6 +351,7 @@ function createNewTaskForm() {
     taskNameInput.type = 'text'
     taskNameInput.name = 'task-name'
     taskNameInput.id = 'task-name'
+    if (editing) {taskNameInput.value = task.title.content}
     taskNameInput.placeholder = 'What is your new To-Do?'
     taskNameInput.required = true
     newTaskName.appendChild(taskNameInput)
@@ -310,6 +368,7 @@ function createNewTaskForm() {
     const taskDescriptionInput = document.createElement('textarea')
     taskDescriptionInput.id = 'task-description'
     taskDescriptionInput.name = 'task-description'
+    if (editing) {taskDescriptionInput.value = task.description.content}
     taskDescriptionInput.placeholder = 'If you want, write something about this To-Do'
     newTaskDescription.appendChild(taskDescriptionInput)
     form.appendChild(newTaskDescription)
@@ -381,10 +440,10 @@ function createNewTaskForm() {
         const descr = document.getElementById('task-description').value
         const prior = document.getElementById('task-priority').value
         const date = new Date(document.getElementById('due-date').value.split("-"))
-
-        console.log(document.getElementById('due-date').value)
         
+        if (editing == true) {task.deleteTask(allProjectsArray)}
         project.addNewTask([name, descr, prior, date])
+        allProjectsArray.updateDateGroups()
         loadTasks(project)
         document.body.removeChild(overlay)
     })

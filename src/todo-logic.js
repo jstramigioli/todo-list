@@ -6,16 +6,27 @@ import { isSameDay } from "date-fns/isSameDay"
 
 import { format } from "date-fns/format"
 
-
-
 let projectID = 0
+
+function arraysAreIdentical(arr1, arr2){
+    if (arr1.length !== arr2.length) return false;
+    for (var i = 0, len = arr1.length; i < len; i++){
+        if (arr1[i] !== arr2[i]){
+            return false;
+        }
+    }
+    return true; 
+}
 
 // Properties for task function factory
 
 const hasTitle = (title) => {
     
     function sort(project) {
+        let currentOrder = project.getTasks().slice()
         project.getTasks().sort((a,b) => a.title.content > b.title.content ? 1 : -1)
+        if (arraysAreIdentical(currentOrder, project.getTasks()))
+        project.getTasks().reverse()
     }
 
     function edit(newTitle) {
@@ -41,7 +52,10 @@ const hasDescription = (description) => {
 
 const hasPriority = (priority) => {
     function sort(project) {
+        let currentOrder = project.getTasks().slice()
         project.getTasks().sort((a,b) => a.priority.value - b.priority.value )
+        if (arraysAreIdentical(currentOrder, project.getTasks()))
+        project.getTasks().reverse()
     }
     let display
 
@@ -77,7 +91,12 @@ const hasPriority = (priority) => {
 const hasDueDate = (dueDate) => {
 
     function sort(project) {
+        let currentOrder = project.getTasks().slice()
+
         project.getTasks().sort((a,b) => isAfter(a.dueDate.date, b.dueDate.date) ? 1 : -1)
+
+        if (arraysAreIdentical(currentOrder, project.getTasks()))
+        project.getTasks().reverse()
     }
 
     function edit(newDueDate) {
@@ -114,19 +133,106 @@ const hasProjectID = () => {
 
 const createProjectsArray = () => {
 
-    function addNewProject(projectProperties) {
-        console.log(this.getProjects())
-        this.getProjects().push(createProject(...projectProperties))
+    function createProject(title, description) {
+    
+        const tasks = []
+        
+        function getTasks()  {return this.tasks}
+    
+        function getTitle() {return this.title}
+    
+        function sortTasks(propertyToSort) {
+            this.tasks.sort(this.getTasks()[0][propertyToSort].sort(this))
+        }
+    
+        function addNewTask(taskProperties) {
+            this.getTasks().push(createTask(...taskProperties))
+        }
+    
+        function getID() {
+            return this.ID
+        }
+    
+        this.projects.push( {
+            title,
+            description,
+            tasks,
+            sortingProperty: 'title',
+            ...hasProjectID(),
+            addNewTask,
+            getTitle,
+            getTasks,
+            sortTasks,
+            getID,
+            
+        }
+        )
     }
 
     function getProjects() {return this.projects} 
- 
+
+    function createDateGrouping(title, from, to) {
+
+            let tasks = []
+
+            function getTasks()  {return this.tasks}
+
+            function getTitle() {return this.title}
+
+            function sortTasks(propertyToSort) {
+                this.tasks.sort(this.getTasks()[0][propertyToSort].sort(this))
+            }
+
+            function clearTasks() {
+                this.tasks = []
+            }
+
+            this.dateGroups.push(
+                {
+                    title,
+                    tasks,
+                    from,
+                    to,
+                    getTasks,
+                    getTitle,
+                    sortTasks,
+                    clearTasks 
+                }
+            )
+        }
+
+    function updateDateGroups() {
+        for (let h = 0 ; h < this.dateGroups.length ; h++) {
+            this.dateGroups[h].clearTasks()
+            for (let i = 0 ; i < this.getProjects().length ; i++) {
+                for (let k = 0 ; k < this.getProjects()[i].getTasks().length ; k++) {
+                    if ((isAfter(this.getProjects()[i].getTasks()[k].getDueDate(), this.dateGroups[h].from)
+                        || 
+                        isSameDay(this.getProjects()[i].getTasks()[k].getDueDate(), this.dateGroups[h].from))
+                        &&
+                        isAfter(this.dateGroups[h].to, this.getProjects()[i].getTasks()[k].getDueDate() ))
+                        {
+                            this.dateGroups[h].getTasks().push(this.getProjects()[i].getTasks()[k])
+                        }
+                }
+            }
+        } 
+        
+    }
+
+    function deleteProject(project) {
+        this.projects.splice(this.projects.indexOf(project), 1)
+    }
 
 
     return {
         projects: [] ,
-        addNewProject , 
-        getProjects
+        dateGroups: [] ,
+        createProject , 
+        getProjects ,
+        createDateGrouping ,
+        updateDateGroups ,
+        deleteProject
     }
 }
 
@@ -146,6 +252,7 @@ const createTask = (title, description, priority, dueDate) => {
                 allProjectsArray.getProjects()[i].getTasks().splice(allProjectsArray.getProjects()[i].getTasks().indexOf(this), 1)
             }
         }
+        allProjectsArray.updateDateGroups()
     }
     return {
         title: hasTitle(title),
@@ -162,123 +269,10 @@ const createTask = (title, description, priority, dueDate) => {
     }
 }
 
-// Project Function Factory
-
-const createProject = (title, description) => {
-    
-    const tasks = []
-    
-    function getTasks()  {return this.tasks}
-
-    function getTitle() {return this.title}
-
-    function sortTasks(propertyToSort) {
-        this.tasks.sort(this.tasks[0][propertyToSort].sort(this))
-    }
-
-    function addNewTask(taskProperties) {
-        this.getTasks().push(createTask(...taskProperties))
-    }
-
-    function getID() {
-        return this.ID
-    }
-
-    function deleteTask(task, allProjectsArray) {
-        this.getTasks().splice(this.getTasks().indexOf(task), 1)
-
-
-       /*  for (let i = 0 ; i < allProjectsArray.length ; i++) {
-            if (allProjectsArray[i].getTasks().includes(task)) {
-                allProjectsArray[i].getTasks().splice(allProjectsArray[i].getTasks().indexOf(task), 1)
-            }
-        } */
-    }
-
-    return {
-        title,
-        description,
-        tasks,
-        ...hasProjectID(),
-        addNewTask,
-        getTitle,
-        getTasks,
-        sortTasks,
-        getID,
-        deleteTask
-    }
-}
-
-
-// Date Grouping factory
-
-const createDateGrouping = (title, from, to) => {
-
-    let tasks = []
-
-    function getTasks()  {return this.tasks}
-
-    function getTitle() {return this.title}
-
-    function sortTasks(propertyToSort) {
-        this.tasks.sort(this.getTasks()[0][propertyToSort].sort(this))
-    }
-
-    function clearTasks() {
-        this.tasks = []
-    }
-
-    function addCorrespondingTasks(allProjectsArray) {
-        for (let i = 0 ; i < allProjectsArray.length ; i++) {
-            for (let k = 0 ; k < allProjectsArray[i].getTasks().length ; k++) {
-                if ((isAfter(allProjectsArray[i].getTasks()[k].getDueDate(), from)
-                    || 
-                    isSameDay(allProjectsArray[i].getTasks()[k].getDueDate(),from))
-                    &&
-                    isAfter(to, allProjectsArray[i].getTasks()[k].getDueDate() ))
-                    {
-                        this.tasks.push(allProjectsArray[i].getTasks()[k])
-                    }
-            }
-        }
-    }
-
-
-    return {
-        title,
-        tasks,
-        getTasks,
-        getTitle,
-        sortTasks,
-        addCorrespondingTasks,
-        clearTasks
-    }
-}
-
-
-
-// Delete Project
-
-const deleteProject = (project, allProjectsArray) => {
-    allProjectsArray.splice(allProjectsArray.indexOf(project), 1)
-}
-
-
-
-
-function updateDateGroups(dateGroup, allProjectsArray) {
-    for (let i=0 ; i<dateGroup.length ; i++) {
-        dateGroup[i].clearTasks()
-        dateGroup[i].addCorrespondingTasks(allProjectsArray)
-    }
-}
 
 
 
 export { 
         createProjectsArray ,
-        updateDateGroups,
         createTask,
-        deleteProject,
-        createDateGrouping,
     }
