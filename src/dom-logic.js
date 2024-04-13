@@ -88,7 +88,7 @@ const createDomStructure = () => {
     // Create new task button
     const newTaskButton = document.createElement('button')
     newTaskButton.classList = 'new-task-button'
-    newTaskButton.textContent = '+ New Task'
+    newTaskButton.textContent = '+'
     newTaskButton.addEventListener('click', createNewTaskForm)
     taskContainer.appendChild(newTaskButton)
 
@@ -154,6 +154,8 @@ function addTaskToDom(task, container) {
     taskDueDate.classList = 'task-duedate'
     taskDueDate.textContent = task.getDueDateDisplay()
 
+    const taskBtnContainer = document.createElement('div')
+
     const editBtn = document.createElement('button')
     editBtn.classList = 'task-edit'
     editBtn.textContent = 'Edit'
@@ -162,6 +164,7 @@ function addTaskToDom(task, container) {
         allProjectsArray.updateDateGroups()
         loadTasks(selectedProject)
     })
+    taskBtnContainer.appendChild(editBtn)
 
     const deleteBtn = document.createElement('button')
     deleteBtn.classList = 'task-delete'
@@ -171,12 +174,12 @@ function addTaskToDom(task, container) {
         allProjectsArray.updateDateGroups()
         loadTasks(selectedProject)
     })
+    taskBtnContainer.appendChild(deleteBtn)
 
     taskElement.appendChild(taskText)
     taskElement.appendChild(taskPriority)
     taskElement.appendChild(taskDueDate)
-    taskElement.appendChild(editBtn)
-    taskElement.appendChild(deleteBtn)
+    taskElement.appendChild(taskBtnContainer)
     container.appendChild(taskElement)
 
 }
@@ -401,7 +404,23 @@ function createNewTaskForm(isEditing, task) {
         const optHigh = document.createElement('option')
         optHigh.label = 'High'
         optHigh.value = '3'
-        taskPriorityInput.appendChild(optHigh)       
+        taskPriorityInput.appendChild(optHigh)      
+    if (editing) {
+        switch (task.priority.value) {
+            case '0':
+                optNotDefined.selected = true;
+                break;
+            case '1':
+                optLow.selected = true;
+                break;
+            case '2':
+                optMedium.selected = true;
+                break;
+            case '3':
+                optHigh.selected = true;
+                break;
+        }
+    } 
     newTaskPriority.appendChild(taskPriorityInput)
     form.appendChild(newTaskPriority)
     
@@ -419,6 +438,8 @@ function createNewTaskForm(isEditing, task) {
     taskDueDateInput.id = 'due-date'
     taskDueDateInput.min = new Date()
     taskDueDateInput.valueAsDate = new Date()
+    if (editing) {taskDueDateInput.valueAsDate = task.dueDate.date
+    console.log(typeof task.dueDate.date === 'function')}
     newTaskDueDate.append(taskDueDateInput)
     form.appendChild(newTaskDueDate)
 

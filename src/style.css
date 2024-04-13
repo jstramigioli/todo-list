@@ -54,12 +54,31 @@ img {
     --background-color: rgb(238, 237, 235);
     --main-color: rgb(224, 204, 190);
     --main-text-color: rgb(116, 114, 100);
-    --accenture-color: rgb(60, 54, 51)
+    --accenture-color: rgb(60, 54, 51);
+
+    --main-font: "Ubuntu", sans-serif;
 }
 
+*, *:before, *:after {
+    box-sizing: inherit;
+  }
 
 body {
     background-color: var(--background-color);
+    font-family: var(--main-font);
+    box-sizing: border-box;
+}
+
+button {
+    font-family: var(--main-font);
+}
+
+input {
+    display: block;
+}
+
+select {
+    display: block;
 }
 
 #content {
@@ -69,14 +88,14 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: var(--main-color);
+    background-color: white;
     align-self: center;
     display: grid;
     grid-template-columns: 1fr 3fr;
     grid-template-rows: auto 1fr;
     align-items: center;
     border-radius: 1rem;
-    box-shadow: 0.4rem 0.4rem 0.4rem var(--accenture-color);
+    box-shadow:  0px 0px 10px 2px rgba(0,0,0,0.27);;
 }
 
 #header {
@@ -92,8 +111,10 @@ body {
 
 #sidebar {
     grid-row: 2 / 3;
-    
-    margin: 2rem;
+    background-color: var(--main-color);
+    height: 100%;
+    width: 100%;
+    padding: 2rem;
 }
 
 .project-button {
@@ -108,11 +129,30 @@ body {
 #main-display {
     
     margin: 2rem;
+    height: 100%;
+}
+
+#project-info-container {
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+}
+
+h1 {
+    font-size: 3.7rem;
+}
+
+h3 {
+    font-size: 1.4rem;
+}
+
+#task-header {
+    display: grid;
+    grid-template-columns: 4fr 1fr 2fr 1fr;
 }
 
 .task-element {
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 4fr 1fr 2fr 1fr;
     padding: 0.2rem;
     border-bottom: var(--main-text-color);
     border-bottom-width: 1px;
@@ -127,19 +167,23 @@ p {
     color: var(--accenture-color);
 }
 
-.task-text {
-    width: 20%;
-    flex-grow: 1;
+.task-description {
+    font-size: 0.9rem;
+    margin-left: 1rem;
 }
 
-.task-priority {
-    width: 15%;
+.new-task-button {
+    background-color: var(--main-color);
+    border-style: none;
+    border-radius: 10px;
+    font-size: 2.5rem;
+    color: var(--main-text-color);
+    height: 3rem;
+    width: 3rem;
 }
 
-.task-duedate {
-    width: 20%;
-}
 
+/*New task form*/
 #overlay {
     position: fixed;
     top: 0;
@@ -153,9 +197,36 @@ p {
 #new-task-form {
     width: 50%;
     height: 100%;
-    background-color: aqua;
+    background-color: var(--main-color);
+    box-shadow:  0px 0px 10px 2px rgba(0,0,0,0.27);;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    padding: 10% 5%;
+}
+
+
+
+input {
+    outline: 0;
+    border-width: 0 0 2px;
+    
+}
+
+textarea {
+    display: block;
+    width: 100%;
+}
+
+#new-task-form label {
+    font-size: 1.5rem;
+}
+
+#select-host-project label {
+    font-size: 1rem;
+}
+
+#task-name {
+    font-size: 2rem;
 }

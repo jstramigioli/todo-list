@@ -60,20 +60,20 @@ const hasPriority = (priority) => {
     let display
 
     switch (priority) {
-        case 0:
+        case '0':
             display = 'No priority defined' ;
             break;
-        case 1: 
+        case '1': 
             display = 'Low';
             break;
-        case 2:
+        case '2':
             display = 'Medium';
             break;
-        case 3:
+        case '3':
             display = 'High'
             break;
         default:
-            display = 'No priority defined' 
+            display = 'default option' 
     }
 
     function edit(newPriority) {
@@ -167,6 +167,7 @@ const createProjectsArray = () => {
             
         }
         )
+        
     }
 
     function getProjects() {return this.projects} 
