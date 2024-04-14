@@ -25,17 +25,14 @@ function initializeApp() {
     allProjectsArray.createDateGrouping('Next 30 days', startOfToday(), addDays(new Date(), 30))
     addStoredDataToAllProjectsArray()
     allProjectsArray.updateDateGroups()
+    allProjectsArray.selectProject(allProjectsArray.dateGroups[0])
     createDomStructure()
     
     updateDateGroupDOM(allProjectsArray.dateGroups)
     updateCustomProjectsDOM(allProjectsArray)
+    loadTasks(allProjectsArray.selectedProject)
 }
 
-function selectProject(project) {
-    selectedProject = project
-    //allProjectsArray.updateDateGroups()
-    loadTasks(project)
-}
 
 function removeTask(task) {
     deleteTask(task, allProjectsArray.getProjects())
@@ -73,12 +70,11 @@ function addStoredDataToAllProjectsArray() {
 
 
 
-let selectedProject = allProjectsArray.getProjects()[0]
 
-export { selectProject ,
+
+export { 
     allProjectsArray ,
     removeTask ,
-    selectedProject ,
     storeData
     }
 
@@ -87,7 +83,7 @@ export { selectProject ,
 
 
 initializeApp()
-selectProject(allProjectsArray.getProjects()[0])
+
 
 
 

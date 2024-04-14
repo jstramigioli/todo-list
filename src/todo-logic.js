@@ -5,6 +5,7 @@ import { isSameDay } from "date-fns/isSameDay"
 
 
 import { format } from "date-fns/format"
+import { selectProject } from ".";
 
 let projectID = 0
 
@@ -225,10 +226,16 @@ const createProjectsArray = () => {
         this.projects.splice(this.projects.indexOf(project), 1)
     }
 
+    function selectProject(project) {
+        this.selectedProject = project
+    }
+
 
     return {
         projects: [] ,
         dateGroups: [] ,
+        selectedProject: '' ,
+        selectProject ,
         createProject , 
         getProjects ,
         createDateGrouping ,

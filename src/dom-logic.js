@@ -1,6 +1,6 @@
-import { selectProject ,
+import { 
         allProjectsArray ,
-        selectedProject ,
+        
         storeData
         } from ".";
 
@@ -11,7 +11,8 @@ const createDomStructure = () => {
     document.body.appendChild(content)
 
     const header = document.createElement('header')
-    header.id = 'header'
+    header.id = 'main-header'
+    header.classList = 'header'
     header.textContent = 'My To-do App'
     content.appendChild(header)
 
@@ -55,24 +56,24 @@ const createDomStructure = () => {
     taskTitle.classList = 'task-text'
     taskTitle.textContent = 'TO DO'
     taskTitle.addEventListener('click', () => {
-        selectedProject.sortTasks('title')
-        loadTasks(selectedProject)
+        allProjectsArray.selectedProject.sortTasks('title')
+        loadTasks(allProjectsArray.selectedProject)
     })
 
     const taskPriority = document.createElement('button')
     taskPriority.classList = 'task-priority'
     taskPriority.textContent = 'Priority'
     taskPriority.addEventListener('click', () => {
-        selectedProject.sortTasks('priority')
-        loadTasks(selectedProject)
+        allProjectsArray.selectedProject.sortTasks('priority')
+        loadTasks(allProjectsArray.selectedProject)
     })
 
     const taskDueDate = document.createElement('button')
     taskDueDate.classList = 'task-duedate'
     taskDueDate.textContent = 'Due Date'
     taskDueDate.addEventListener('click', () => {
-        selectedProject.sortTasks('dueDate')
-        loadTasks(selectedProject)
+        allProjectsArray.selectedProject.sortTasks('dueDate')
+        loadTasks(allProjectsArray.selectedProject)
     })
 
     taskHeader.appendChild(taskTitle)
@@ -102,14 +103,25 @@ const createDomStructure = () => {
 
 function addProjectToDom(project, container) {
     const projectDiv = document.createElement('div')
+    projectDiv.classList = 'project-div'
+    if (project == allProjectsArray.selectedProject) {projectDiv.classList.add('proj-selected')}
+    console.log(allProjectsArray.selectedProject)
 
     const projectButton = document.createElement('button')
     projectButton.classList = 'project-button'
     projectButton.textContent = project.getTitle()
     projectButton.addEventListener('click', () => {
-        selectProject(project)
+        allProjectsArray.selectProject(project)
+        const allProjectDiv = document.querySelectorAll('.project-div')
+        for (let i = 0 ; i < allProjectDiv.length ; i++) {
+            if (allProjectDiv[i].classList.contains('proj-selected')) {
+                allProjectDiv[i].classList.remove('proj-selected')
+            }
+        }
+        projectDiv.classList.add('proj-selected')
+        loadTasks(project)
     })
-    projectDiv.appendChild(projectButton)
+    
 
     if (container.id == 'custom-projects-container') {
         const deleteProjBtn = document.createElement('button')
@@ -118,13 +130,15 @@ function addProjectToDom(project, container) {
         deleteProjBtn.addEventListener('click', () => {
             allProjectsArray.deleteProject(project)
             allProjectsArray.updateDateGroups()
-            if (project == selectedProject) {
-                selectProject(allProjectsArray.dateGroups[0])
+            if (project == allProjectsArray.selectedProject) {
+                allProjectsArray.selectProject(allProjectsArray.dateGroups[0])
+                loadTasks(allProjectsArray.dateGroups[0])
             }   
             container.removeChild(projectDiv)
         })
         projectDiv.appendChild(deleteProjBtn)
     }
+    projectDiv.appendChild(projectButton)
 
     container.appendChild(projectDiv)
 }
@@ -162,7 +176,7 @@ function addTaskToDom(task, container) {
     editBtn.addEventListener('click', () => {
         createNewTaskForm('editing', task)
         allProjectsArray.updateDateGroups()
-        loadTasks(selectedProject)
+        loadTasks(allProjectsArray.selectedProject)
     })
     taskBtnContainer.appendChild(editBtn)
 
@@ -172,7 +186,7 @@ function addTaskToDom(task, container) {
     deleteBtn.addEventListener('click', () => {
         task.deleteTask(allProjectsArray)
         allProjectsArray.updateDateGroups()
-        loadTasks(selectedProject)
+        loadTasks(allProjectsArray.selectedProject)
     })
     taskBtnContainer.appendChild(deleteBtn)
 
@@ -320,6 +334,11 @@ function createNewTaskForm(isEditing, task) {
     const form = document.createElement('form')
     form.id = 'new-task-form'
 
+    const newTaskHeader = document.createElement('div')
+    newTaskHeader.classList = 'header'
+    newTaskHeader.id = 'form-header'
+    form.appendChild(newTaskHeader)
+
     // Add input and Label for Host Project
     const hostProject = document.createElement('div')
     hostProject.id = 'select-host-project'
@@ -335,13 +354,17 @@ function createNewTaskForm(isEditing, task) {
         const project = document.createElement('option')
         project.label = allProjectsArray.getProjects()[i].getTitle()
         project.value = allProjectsArray.getProjects()[i].getID()
-        if (typeof selectedProject.getID === 'function' && project.value == selectedProject.getID()) {
+        if (typeof allProjectsArray.selectedProject.getID === 'function' && project.value == allProjectsArray.selectedProject.getID()) {
             project.defaultSelected = true
         }
         hostProjectInput.appendChild(project)
     }
     hostProject.appendChild(hostProjectInput)
     form.appendChild(hostProject)
+
+    const taskPropertiesInputContainer = document.createElement('div')
+    taskPropertiesInputContainer.id = 'task-properties-input'
+    form.appendChild(taskPropertiesInputContainer)
 
     // Add input and Label for Name
     const newTaskName = document.createElement('div')
@@ -359,7 +382,7 @@ function createNewTaskForm(isEditing, task) {
     taskNameInput.placeholder = 'What is your new To-Do?'
     taskNameInput.required = true
     newTaskName.appendChild(taskNameInput)
-    form.appendChild(newTaskName)
+    taskPropertiesInputContainer.appendChild(newTaskName)
 
     // Add input and Label for Description
     const newTaskDescription = document.createElement('div')
@@ -375,7 +398,7 @@ function createNewTaskForm(isEditing, task) {
     if (editing) {taskDescriptionInput.value = task.description.content}
     taskDescriptionInput.placeholder = 'If you want, write something about this To-Do'
     newTaskDescription.appendChild(taskDescriptionInput)
-    form.appendChild(newTaskDescription)
+    taskPropertiesInputContainer.appendChild(newTaskDescription)
     
 
     // Add input and label for Priority
@@ -422,7 +445,7 @@ function createNewTaskForm(isEditing, task) {
         }
     } 
     newTaskPriority.appendChild(taskPriorityInput)
-    form.appendChild(newTaskPriority)
+    taskPropertiesInputContainer.appendChild(newTaskPriority)
     
     // Add input and label for Due date
     const newTaskDueDate = document.createElement('div')
@@ -441,12 +464,13 @@ function createNewTaskForm(isEditing, task) {
     if (editing) {taskDueDateInput.valueAsDate = task.dueDate.date
     console.log(typeof task.dueDate.date === 'function')}
     newTaskDueDate.append(taskDueDateInput)
-    form.appendChild(newTaskDueDate)
+    taskPropertiesInputContainer.appendChild(newTaskDueDate)
 
     // Add submit button
     const addTaskBtn = document.createElement('input')
+    addTaskBtn.classList.add('new-task-button')
     addTaskBtn.type = 'submit'
-    addTaskBtn.textContent = '+'
+    addTaskBtn.value = '+'
     form.appendChild(addTaskBtn)
 
     newTaskFormContainer.appendChild(form)
