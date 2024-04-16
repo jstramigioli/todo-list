@@ -53,6 +53,7 @@ img {
 :root {
     --background-color: rgb(238, 237, 235);
     --main-color: rgb(224, 204, 190);
+    --main-color-hover: rgb(253, 237, 226);
     --main-text-color: rgb(116, 114, 100);
     --accenture-color: rgb(60, 54, 51);
 
@@ -115,6 +116,10 @@ select {
     display: flex;
 }
 
+#sidebar .hovered:not(.proj-selected) {
+    background-color: var(--main-color-hover);
+}
+
 .project-button {
     background-color: transparent;
     width: 100%;
@@ -154,8 +159,15 @@ select {
     margin-bottom: 3rem;
 }
 
-h1 {
+#project-info-container input, h1 {
     font-size: 3.7rem;
+    margin-right: 30%;
+}
+
+#project-title.hovered {
+    border-bottom: 3px;
+    border-style: solid;
+    cursor: pointer;
 }
 
 h3 {
@@ -194,6 +206,8 @@ h3 {
     border-bottom: var(--main-text-color);
     border-bottom-width: 1px;
     border-style: solid;
+    height: 4rem;
+    align-items: center;
 }
 
 p {
@@ -209,6 +223,33 @@ p {
     margin-left: 1rem;
 }
 
+.task-title {
+    color: var(--accenture-color);
+    font-size: 1.3rem;
+}
+
+.task-btn-container {
+    display: flex;
+    width: 4.5rem;
+    justify-content: space-between;
+}
+
+#existing-tasks button {
+    height: 2rem;
+    width: 2rem;
+    border-style: none;
+    background-color: var(--main-color);
+    border-radius: 0.3rem;
+}
+
+.task-edit {
+    background: url('img/edit_FILL0_wght400_GRAD0_opsz24.svg') center no-repeat;
+}
+
+.task-delete {
+    background: url('img/close_FILL0_wght400_GRAD0_opsz24.svg') center no-repeat;
+}
+
 .new-task-button {
     background-color: var(--main-color);
     border-style: none;
@@ -218,6 +259,11 @@ p {
     height: 3rem;
     width: 3rem;
     align-content: center;
+}
+
+.new-task-button.hovered {
+    height: 3.15rem;
+    width: 3.15rem;
 }
 
 

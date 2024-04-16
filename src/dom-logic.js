@@ -91,6 +91,7 @@ const createDomStructure = () => {
     const newTaskButton = document.createElement('button')
     newTaskButton.classList = 'new-task-button'
     newTaskButton.textContent = '+'
+    addHoverListener(newTaskButton)
     newTaskButton.addEventListener('click', createNewTaskForm)
     taskContainer.appendChild(newTaskButton)
 
@@ -134,13 +135,8 @@ function addProjectToDom(project, container) {
             updateCustomProjectsDOM(allProjectsArray)
         })
         projectDiv.appendChild(deleteProjBtn)
-        projectDiv.addEventListener('mouseover', () => {
-            projectDiv.classList.add('hovered')
-        })
-        projectDiv.addEventListener('mouseout', () => {
-            projectDiv.classList.remove('hovered')
-        })
     }
+    addHoverListener(projectDiv)
     projectDiv.appendChild(projectButton)
 
     container.appendChild(projectDiv)
@@ -172,10 +168,11 @@ function addTaskToDom(task, container) {
     taskDueDate.textContent = task.getDueDateDisplay()
 
     const taskBtnContainer = document.createElement('div')
+    taskBtnContainer.classList = 'task-btn-container'
 
     const editBtn = document.createElement('button')
     editBtn.classList = 'task-edit'
-    editBtn.textContent = 'Edit'
+    addHoverListener(editBtn)
     editBtn.addEventListener('click', () => {
         createNewTaskForm('editing', task)
         allProjectsArray.updateDateGroups()
@@ -185,7 +182,6 @@ function addTaskToDom(task, container) {
 
     const deleteBtn = document.createElement('button')
     deleteBtn.classList = 'task-delete'
-    deleteBtn.textContent = 'X'
     deleteBtn.addEventListener('click', () => {
         task.deleteTask(allProjectsArray)
         allProjectsArray.updateDateGroups()
@@ -219,6 +215,7 @@ function updateCustomProjectsDOM(arr) {
     const newProjectBtn = document.createElement('button')
     newProjectBtn.classList = 'project-button'
     newProjectBtn.textContent = '+ New Project'
+    addHoverListener(newProjectBtn)
     newProjectBtn.addEventListener('click', () => {
         const newProject = allProjectsArray.createProject('New Project')
         console.log(newProject)
@@ -247,9 +244,14 @@ function DOMSelectProject(project) {
 
 function loadTasks(project) {
     
-    const projectTitleDisplay = document.querySelector('#project-title')
+    const projectInfoContainer = document.querySelector('#project-info-container')
+    //const oldProjectTitleDisplay = document.querySelector('#project-title')
+    const projectTitleDisplay = document.createElement('h1')
+    projectInfoContainer.innerHTML = ''
+    projectTitleDisplay.id = '#project-title'
     projectTitleDisplay.textContent = project.title
-    projectTitleDisplay.addEventListener('click', editProject)
+    projectInfoContainer.appendChild(projectTitleDisplay)
+    addEditProjectListener(project, projectTitleDisplay)
 
     const taskContainer = document.querySelector('#existing-tasks')
     taskContainer.innerHTML = ['']
@@ -258,6 +260,14 @@ function loadTasks(project) {
         addTaskToDom(project.getTasks()[i], taskContainer)
     }
     storeData()
+}
+
+function addEditProjectListener(project, htmlElement) {
+    if (allProjectsArray.getProjects().includes(project)){
+        addHoverListener(htmlElement)
+        console.log('la puta madre')
+        htmlElement.addEventListener('click', editProject)
+    }
 }
 
 function editProject() {
@@ -281,12 +291,12 @@ function editProject() {
         newProjectTitleDisplay.id = 'project-title'
         newProjectTitleDisplay.textContent = allProjectsArray.selectedProject.title
         projectInfo.replaceChild(newProjectTitleDisplay, projectNameInput )
-        newProjectTitleDisplay.addEventListener('click', editProject)
+        addEditProjectListener(allProjectsArray.selectedProject, newProjectTitleDisplay)
         updateCustomProjectsDOM(allProjectsArray)
     }
 
     projectNameInput.addEventListener('blur', setTitleHandler)
-
+    projectNameInput.focus()
 }
 
 
@@ -445,6 +455,7 @@ function createNewTaskForm(isEditing, task) {
     addTaskBtn.classList.add('new-task-button')
     addTaskBtn.type = 'submit'
     addTaskBtn.value = '+'
+    addHoverListener(addTaskBtn)
     form.appendChild(addTaskBtn)
 
     newTaskFormContainer.appendChild(form)
@@ -470,6 +481,15 @@ function createNewTaskForm(isEditing, task) {
 
     overlay.appendChild(newTaskFormContainer)
     document.body.appendChild(overlay)
+}
+
+function addHoverListener(htmlElement) {
+    htmlElement.addEventListener('mouseover', () => {
+        htmlElement.classList.add('hovered')
+    })
+    htmlElement.addEventListener('mouseout', () => {
+        htmlElement.classList.remove('hovered')
+    })
 }
 
 
