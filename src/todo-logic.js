@@ -5,7 +5,7 @@ import { isSameDay } from "date-fns/isSameDay"
 
 
 import { format } from "date-fns/format"
-import { selectProject } from ".";
+import { allProjectsArray, selectProject } from ".";
 
 let projectID = 0
 
@@ -130,6 +130,10 @@ const hasProjectID = () => {
     }
 }
 
+const canBeSelected = () => {
+    return {selected: false}
+}
+
 // Array of projects function factory
 
 const createProjectsArray = () => {
@@ -165,9 +169,12 @@ const createProjectsArray = () => {
             getTasks,
             sortTasks,
             getID,
+            ...canBeSelected()
             
         }
         )
+
+        return this.projects[this.projects.length - 1]
         
     }
 
@@ -198,7 +205,9 @@ const createProjectsArray = () => {
                     getTasks,
                     getTitle,
                     sortTasks,
-                    clearTasks 
+                    clearTasks ,
+                    ...hasProjectID(),
+                    ...canBeSelected()
                 }
             )
         }
@@ -226,8 +235,19 @@ const createProjectsArray = () => {
         this.projects.splice(this.projects.indexOf(project), 1)
     }
 
+
     function selectProject(project) {
         this.selectedProject = project
+        
+        
+        
+        for (let i = 0; i < this.getProjects().length ; i++) {
+            this.getProjects()[i].selected = false
+        }
+        for (let i = 0; i < this.dateGroups.length ; i++) {
+            this.dateGroups[i].selected = false
+        }
+        project.selected = true
     }
 
 

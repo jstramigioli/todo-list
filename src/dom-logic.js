@@ -37,9 +37,7 @@ const createDomStructure = () => {
     const projectTitle = document.createElement('h1')
     projectTitle.id = 'project-title'
     projectInfoContainer.appendChild(projectTitle)
-    const projectDescription = document.createElement('h3')
-    projectDescription.id = 'project-description'
-    projectInfoContainer.appendChild(projectDescription)
+    
     mainDisplay.appendChild(projectInfoContainer)
 
 
@@ -56,6 +54,7 @@ const createDomStructure = () => {
     taskTitle.classList = 'task-text'
     taskTitle.textContent = 'TO DO'
     taskTitle.addEventListener('click', () => {
+        if (allProjectsArray.selectedProject.getTasks().length > 0)
         allProjectsArray.selectedProject.sortTasks('title')
         loadTasks(allProjectsArray.selectedProject)
     })
@@ -64,6 +63,7 @@ const createDomStructure = () => {
     taskPriority.classList = 'task-priority'
     taskPriority.textContent = 'Priority'
     taskPriority.addEventListener('click', () => {
+        if (allProjectsArray.selectedProject.getTasks().length > 0)
         allProjectsArray.selectedProject.sortTasks('priority')
         loadTasks(allProjectsArray.selectedProject)
     })
@@ -72,6 +72,7 @@ const createDomStructure = () => {
     taskDueDate.classList = 'task-duedate'
     taskDueDate.textContent = 'Due Date'
     taskDueDate.addEventListener('click', () => {
+        if (allProjectsArray.selectedProject.getTasks().length > 0)
         allProjectsArray.selectedProject.sortTasks('dueDate')
         loadTasks(allProjectsArray.selectedProject)
     })
@@ -104,22 +105,16 @@ const createDomStructure = () => {
 function addProjectToDom(project, container) {
     const projectDiv = document.createElement('div')
     projectDiv.classList = 'project-div'
+    projectDiv.dataset.projID = project.ID
     if (project == allProjectsArray.selectedProject) {projectDiv.classList.add('proj-selected')}
-    console.log(allProjectsArray.selectedProject)
 
     const projectButton = document.createElement('button')
     projectButton.classList = 'project-button'
     projectButton.textContent = project.getTitle()
     projectButton.addEventListener('click', () => {
         allProjectsArray.selectProject(project)
-        const allProjectDiv = document.querySelectorAll('.project-div')
-        for (let i = 0 ; i < allProjectDiv.length ; i++) {
-            if (allProjectDiv[i].classList.contains('proj-selected')) {
-                allProjectDiv[i].classList.remove('proj-selected')
-            }
-        }
-        projectDiv.classList.add('proj-selected')
-        loadTasks(project)
+        DOMSelectProject(project)
+        
     })
     
 
@@ -129,14 +124,22 @@ function addProjectToDom(project, container) {
         deleteProjBtn.textContent = 'X'
         deleteProjBtn.addEventListener('click', () => {
             allProjectsArray.deleteProject(project)
+            
             allProjectsArray.updateDateGroups()
-            if (project == allProjectsArray.selectedProject) {
+        
+            if (project.selected == true) {
                 allProjectsArray.selectProject(allProjectsArray.dateGroups[0])
-                loadTasks(allProjectsArray.dateGroups[0])
+                DOMSelectProject(allProjectsArray.dateGroups[0])
             }   
-            container.removeChild(projectDiv)
+            updateCustomProjectsDOM(allProjectsArray)
         })
         projectDiv.appendChild(deleteProjBtn)
+        projectDiv.addEventListener('mouseover', () => {
+            projectDiv.classList.add('hovered')
+        })
+        projectDiv.addEventListener('mouseout', () => {
+            projectDiv.classList.remove('hovered')
+        })
     }
     projectDiv.appendChild(projectButton)
 
@@ -217,21 +220,36 @@ function updateCustomProjectsDOM(arr) {
     newProjectBtn.classList = 'project-button'
     newProjectBtn.textContent = '+ New Project'
     newProjectBtn.addEventListener('click', () => {
-        createNewProjectForm()
+        const newProject = allProjectsArray.createProject('New Project')
+        console.log(newProject)
+        allProjectsArray.selectProject(newProject)
         updateCustomProjectsDOM(arr)
+        DOMSelectProject(newProject)
     })
     groupContainer.appendChild(newProjectBtn)
     storeData()
 }
 
+function DOMSelectProject(project) {
+    const allProjectDiv = [...document.querySelectorAll('.project-div')]
+        for (let i = 0 ; i < allProjectDiv.length ; i++) {
+            if (allProjectDiv[i].classList.contains('proj-selected')) {
+                allProjectDiv[i].classList.remove('proj-selected')
+            }
+        }
+        
+        const projectDiv = allProjectDiv.find((divs) => {
+            return divs.dataset.projID == project.ID
+        })
+        projectDiv.classList.add('proj-selected')
+        loadTasks(project)
+}
 
 function loadTasks(project) {
     
     const projectTitleDisplay = document.querySelector('#project-title')
     projectTitleDisplay.textContent = project.title
-
-    const projectDescriptionDisplay = document.querySelector('#project-description')
-    projectDescriptionDisplay.textContent = project.description
+    projectTitleDisplay.addEventListener('click', editProject)
 
     const taskContainer = document.querySelector('#existing-tasks')
     taskContainer.innerHTML = ['']
@@ -242,77 +260,33 @@ function loadTasks(project) {
     storeData()
 }
 
-function createNewProjectForm() {
-    const overlay = document.createElement('div')
-    overlay.id = 'project-overlay'
-    overlay.addEventListener('click', (e) => {
-        document.body.removeChild(overlay)
-    })
-
-    const newProjectFormContainer = document.createElement('div')
-    newProjectFormContainer.id = 'new-project-form-container'
-    newProjectFormContainer.addEventListener('click', (e) => {
-        e.stopPropagation(); 
-    })
-    const form = document.createElement('form')
-    form.id = 'new-project-form'
-
-    // Add input and Label for Name
-    const newProjectName = document.createElement('div')
-    newProjectName.id = 'new-project-name'
-    newProjectName.classList = 'form-input'
-    const projectNameLabel = document.createElement('label')
-    projectNameLabel.htmlFor = 'project-name'
-    projectNameLabel.innerHTML = 'Project name'
-    newProjectName.appendChild(projectNameLabel)
+function editProject() {
+    
+    const projectInfo = document.getElementById('project-info-container')
+    const projectTitleDisplay = projectInfo.lastChild
+    
     const projectNameInput = document.createElement('input')
     projectNameInput.type = 'text'
-    projectNameInput.name = 'project-name'
-    projectNameInput.id = 'project-name'
-    projectNameInput.placeholder = 'What is your new project about?'
-    projectNameInput.required = true
-    newProjectName.appendChild(projectNameInput)
-    form.appendChild(newProjectName)
+    projectNameInput.value = allProjectsArray.selectedProject.getTitle()
 
-    // Add input and Label for Description
-    const newProjectDescription = document.createElement('div')
-    newProjectDescription.id = 'new-project-description'
-    newProjectDescription.classList = 'form-input'
-    const projectDescriptionLabel = document.createElement('label')
-    projectDescriptionLabel.htmlFor = 'project-description'
-    projectDescriptionLabel.innerHTML = 'Description'
-    newProjectDescription.appendChild(projectDescriptionLabel)
-    const projectDescriptionInput = document.createElement('textarea')
-    projectDescriptionInput.id = 'project-description'
-    projectDescriptionInput.name = 'project-description'
-    projectDescriptionInput.placeholder = 'If you want, write something about this project'
-    newProjectDescription.appendChild(projectDescriptionInput)
-    form.appendChild(newProjectDescription)
+    projectInfo.replaceChild(projectNameInput, projectTitleDisplay )
 
-    // Add submit button
-    const addProjectBtn = document.createElement('input')
-    addProjectBtn.type = 'submit'
-    addProjectBtn.textContent = '+'
-    form.appendChild(addProjectBtn)
+    function setProjectTitle(title) {
+        allProjectsArray.selectedProject.title = title
+    }
 
-    newProjectFormContainer.appendChild(form)
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault()
-
-        const allProjects = allProjectsArray
-        
-        const name = document.getElementById('project-name').value
-        const descr = document.getElementById('project-description').value
-
-        allProjects.createProject([name, descr])
+    function setTitleHandler() {
+        setProjectTitle(projectNameInput.value)
+        const newProjectTitleDisplay = document.createElement('h1')
+        newProjectTitleDisplay.id = 'project-title'
+        newProjectTitleDisplay.textContent = allProjectsArray.selectedProject.title
+        projectInfo.replaceChild(newProjectTitleDisplay, projectNameInput )
+        newProjectTitleDisplay.addEventListener('click', editProject)
         updateCustomProjectsDOM(allProjectsArray)
+    }
 
-        document.body.removeChild(overlay)
-    })
+    projectNameInput.addEventListener('blur', setTitleHandler)
 
-    overlay.appendChild(newProjectFormContainer)
-    document.body.appendChild(overlay)
 }
 
 
