@@ -5,7 +5,7 @@ import { isSameDay } from "date-fns/isSameDay"
 
 
 import { format } from "date-fns/format"
-import { allProjectsArray, selectProject } from ".";
+/* import { allProjectsArray, selectProject } from "."; */
 
 let projectID = 0
 
@@ -25,7 +25,7 @@ const hasTitle = (title) => {
     
     function sort(project) {
         let currentOrder = project.getTasks().slice()
-        project.getTasks().sort((a,b) => a.title.content > b.title.content ? 1 : -1)
+        project.getTasks().sort((a,b) => a.title.content.toUpperCase() > b.title.content.toUpperCase() ? 1 : -1)
         if (arraysAreIdentical(currentOrder, project.getTasks()))
         project.getTasks().reverse()
     }
@@ -138,7 +138,7 @@ const canBeSelected = () => {
 
 const createProjectsArray = () => {
 
-    function createProject(title, description) {
+    function createProject(title) {
     
         const tasks = []
         
@@ -160,7 +160,6 @@ const createProjectsArray = () => {
     
         this.projects.push( {
             title,
-            description,
             tasks,
             sortingProperty: 'title',
             ...hasProjectID(),

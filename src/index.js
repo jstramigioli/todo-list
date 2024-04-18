@@ -59,16 +59,14 @@ function addStoredDataToAllProjectsArray() {
         }
     }
     else {
-    const proyPrueba1 = allProjectsArray.createProject('Proyectito', 'probando el proyectito')
-    const proyPrueba2 = allProjectsArray.createProject('Proyectito2', 'probando el proyectito2')
-    
-    allProjectsArray.getProjects()[0].addNewTask(['Vitulo de prueba', 'esta es una tarea de prueba', '3', new Date(2024, 3, 11)])
-    allProjectsArray.getProjects()[0].addNewTask(['Titulo de prueba2', 'testa es una tarea de prueba2', '1' , new Date(2024, 3, 3)])
-    allProjectsArray.getProjects()[0].addNewTask(['Aloha', 'zesta es una tarea de prueba2', '2', new Date(2023, 2, 22)])
+    loadDefaultProject()
 }
 }
 
-
+function loadDefaultProject() {
+    const defaultProj = allProjectsArray.createProject('My first Project')
+    defaultProj.addNewTask(['My first to do', 'Here you can write something about this to do.', '1', new Date()])
+}
 
 
 

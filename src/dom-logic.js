@@ -13,7 +13,10 @@ const createDomStructure = () => {
     const header = document.createElement('header')
     header.id = 'main-header'
     header.classList = 'header'
-    header.textContent = 'My To-do App'
+
+    const appTitle = document.createElement('h2')
+    appTitle.textContent = 'My To-do App'
+    header.appendChild(appTitle)
     content.appendChild(header)
 
     // SideBar
@@ -23,6 +26,7 @@ const createDomStructure = () => {
     const dateGroupContainer = document.createElement('div')
     dateGroupContainer.id = `date-group-container`
     sideBar.appendChild(dateGroupContainer)
+
     const customProjectsContainer = document.createElement('div')
     customProjectsContainer.id = 'custom-projects-container'
     sideBar.appendChild(customProjectsContainer)
@@ -34,10 +38,10 @@ const createDomStructure = () => {
     // Create Project info
     const projectInfoContainer = document.createElement('div')
     projectInfoContainer.id = 'project-info-container'
+
     const projectTitle = document.createElement('h1')
     projectTitle.id = 'project-title'
     projectInfoContainer.appendChild(projectTitle)
-    
     mainDisplay.appendChild(projectInfoContainer)
 
 
@@ -94,11 +98,7 @@ const createDomStructure = () => {
     addHoverListener(newTaskButton)
     newTaskButton.addEventListener('click', createNewTaskForm)
     taskContainer.appendChild(newTaskButton)
-
-
     mainDisplay.appendChild(taskContainer)
-
-
     content.appendChild(mainDisplay)
 
 }
@@ -108,26 +108,21 @@ function addProjectToDom(project, container) {
     projectDiv.classList = 'project-div'
     projectDiv.dataset.projID = project.ID
     if (project == allProjectsArray.selectedProject) {projectDiv.classList.add('proj-selected')}
-
     const projectButton = document.createElement('button')
     projectButton.classList = 'project-button'
     projectButton.textContent = project.getTitle()
     projectButton.addEventListener('click', () => {
         allProjectsArray.selectProject(project)
         DOMSelectProject(project)
-        
     })
     
-
     if (container.id == 'custom-projects-container') {
         const deleteProjBtn = document.createElement('button')
         deleteProjBtn.classList = 'delete-proj-btn'
         deleteProjBtn.textContent = 'X'
         deleteProjBtn.addEventListener('click', () => {
             allProjectsArray.deleteProject(project)
-            
             allProjectsArray.updateDateGroups()
-        
             if (project.selected == true) {
                 allProjectsArray.selectProject(allProjectsArray.dateGroups[0])
                 DOMSelectProject(allProjectsArray.dateGroups[0])
@@ -212,18 +207,20 @@ function updateCustomProjectsDOM(arr) {
     for (let i = 0 ; i < customProjects.length ; i++) {
         addProjectToDom(customProjects[i], groupContainer)
     }
+    const newProjectDiv = document.createElement('div')
+    newProjectDiv.classList = 'project-div'
     const newProjectBtn = document.createElement('button')
     newProjectBtn.classList = 'project-button'
     newProjectBtn.textContent = '+ New Project'
     addHoverListener(newProjectBtn)
     newProjectBtn.addEventListener('click', () => {
         const newProject = allProjectsArray.createProject('New Project')
-        console.log(newProject)
         allProjectsArray.selectProject(newProject)
         updateCustomProjectsDOM(arr)
         DOMSelectProject(newProject)
     })
-    groupContainer.appendChild(newProjectBtn)
+    newProjectDiv.appendChild(newProjectBtn)
+    groupContainer.appendChild(newProjectDiv)
     storeData()
 }
 
@@ -265,7 +262,6 @@ function loadTasks(project) {
 function addEditProjectListener(project, htmlElement) {
     if (allProjectsArray.getProjects().includes(project)){
         addHoverListener(htmlElement)
-        console.log('la puta madre')
         htmlElement.addEventListener('click', editProject)
     }
 }
@@ -274,11 +270,9 @@ function editProject() {
     
     const projectInfo = document.getElementById('project-info-container')
     const projectTitleDisplay = projectInfo.lastChild
-    
     const projectNameInput = document.createElement('input')
     projectNameInput.type = 'text'
     projectNameInput.value = allProjectsArray.selectedProject.getTitle()
-
     projectInfo.replaceChild(projectNameInput, projectTitleDisplay )
 
     function setProjectTitle(title) {
@@ -329,7 +323,7 @@ function createNewTaskForm(isEditing, task) {
     hostProject.classList = 'form-input'
     const hostProjectLabel = document.createElement('label')
     hostProjectLabel.htmlFor = 'host-project'
-    hostProjectLabel.innerHTML = 'In wich project do yo want to create your new task?'
+    hostProjectLabel.innerHTML = 'Select project for this to-do'
     hostProject.appendChild(hostProjectLabel)
     const hostProjectInput = document.createElement('select')
     hostProjectInput.id = 'host-project'
@@ -384,7 +378,6 @@ function createNewTaskForm(isEditing, task) {
     newTaskDescription.appendChild(taskDescriptionInput)
     taskPropertiesInputContainer.appendChild(newTaskDescription)
     
-
     // Add input and label for Priority
     const newTaskPriority = document.createElement('div')
     newTaskPriority.id = 'new-task-priority'
@@ -445,8 +438,7 @@ function createNewTaskForm(isEditing, task) {
     taskDueDateInput.id = 'due-date'
     taskDueDateInput.min = new Date()
     taskDueDateInput.valueAsDate = new Date()
-    if (editing) {taskDueDateInput.valueAsDate = task.dueDate.date
-    console.log(typeof task.dueDate.date === 'function')}
+    if (editing) {taskDueDateInput.valueAsDate = task.dueDate.date}
     newTaskDueDate.append(taskDueDateInput)
     taskPropertiesInputContainer.appendChild(newTaskDueDate)
 
@@ -457,7 +449,6 @@ function createNewTaskForm(isEditing, task) {
     addTaskBtn.value = '+'
     addHoverListener(addTaskBtn)
     form.appendChild(addTaskBtn)
-
     newTaskFormContainer.appendChild(form)
 
     form.addEventListener('submit', (e) => {
@@ -491,7 +482,6 @@ function addHoverListener(htmlElement) {
         htmlElement.classList.remove('hovered')
     })
 }
-
 
 export {
     createDomStructure,
